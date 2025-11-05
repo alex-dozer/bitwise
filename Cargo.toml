@@ -1,0 +1,3 @@
+[workspace]
+members = ["if-test", "logicbits", "logicbits_macros", "runner"]
+resolver = "3"
