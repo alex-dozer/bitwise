@@ -8,7 +8,7 @@ use syn::{
 
 use crate::data_objects::FieldAttr;
 
-fn generate_for(ast: &DeriveInput) -> TokenStream2 {
+pub fn generate_for_kitchen(ast: &DeriveInput) -> TokenStream2 {
     let ty_ident = ast.ident.clone();
     let generics = ast.generics.clone();
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
@@ -156,7 +156,7 @@ fn parse_kitchen_menu(attrs: &[Attribute]) -> Option<u16> {
     out
 }
 
-fn compile_error(span: Span, msg: &str) -> TokenStream2 {
+pub fn compile_error(span: Span, msg: &str) -> TokenStream2 {
     let t = quote::quote_spanned!(span => compile_error!(#msg););
     t.into()
 }
