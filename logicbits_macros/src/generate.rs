@@ -1,40 +1,31 @@
 use heck::ToSnakeCase;
-use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::{format_ident, quote};
 use syn::{
-    Attribute, Data, DeriveInput, Fields, Ident, LitStr, Type, parse_macro_input, spanned::Spanned,
+    Attribute, Data, DeriveInput, Fields, Ident, LitStr, Type, parse_macro_input, parse2,
+    spanned::Spanned,
 };
 
-#[derive(Debug)]
-enum FieldAttr {
-    Diner { pred: String },
-    Kitchen { eq: String, pred: String },
-    Largeness { pred_prefix: String, heat: Vec<u32> },
-    Serve { pred_ns: String },
-}
+use crate::data_objects::FieldAttr;
 
-pub fn derive_yuck_tokens(input: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-
-    // only structs with named fields
-    let ty_ident = input.ident.clone();
-    let generics = input.generics.clone();
+fn generate_for(ast: &DeriveInput) -> TokenStream2 {
+    let ty_ident = ast.ident.clone();
+    let generics = ast.generics.clone();
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-    let fields = match &input.data {
+    let fields = match &ast.data {
         Data::Struct(s) => match &s.fields {
             Fields::Named(f) => &f.named,
             _ => {
                 return compile_error(
-                    input.span(),
+                    ast.span(),
                     "KitchenNightmares only supports structs with named fields",
                 );
             }
         },
-        _ => return compile_error(input.span(), "KitchenNightmares only supports structs"),
+        _ => return compile_error(ast.span(), "KitchenNightmares only supports structs"),
     };
 
-    let kitchen_menu = parse_kitchen_menu(&input.attrs).unwrap_or(1);
+    let kitchen_menu = parse_kitchen_menu(&ast.attrs).unwrap_or(1);
 
     let mod_name = format!("__nightmares_{}", ty_ident.to_string().to_snake_case());
     let mod_ident = format_ident!("{}", mod_name);
@@ -148,6 +139,28 @@ pub fn derive_yuck_tokens(input: TokenStream) -> TokenStream {
     expanded.into()
 }
 
+fn parse_kitchen_menu(attrs: &[Attribute]) -> Option<u16> {
+    let mut out = None;
+    for a in attrs {
+        if a.path().is_ident("yuck") {
+            // syn v2: parse_nested_meta
+            let _ = a.parse_nested_meta(|pm| {
+                if pm.path.is_ident("kitchen_menu") {
+                    let lit: syn::LitInt = pm.value()?.parse()?;
+                    out = lit.base10_parse::<u16>().ok();
+                }
+                Ok(())
+            });
+        }
+    }
+    out
+}
+
+fn compile_error(span: Span, msg: &str) -> TokenStream2 {
+    let t = quote::quote_spanned!(span => compile_error!(#msg););
+    t.into()
+}
+
 fn rust_ident(name: &str) -> Ident {
     Ident::new(name, Span::call_site())
 }
@@ -234,27 +247,4 @@ fn parse_field_attrs(attrs: &[Attribute]) -> Vec<FieldAttr> {
         });
     }
     out
-}
-
-fn parse_kitchen_menu(attrs: &[Attribute]) -> Option<u16> {
-    let mut out: Option<u16> = None;
-    for a in attrs {
-        if a.path().is_ident("yuck") {
-            a.parse_nested_meta(|pm| {
-                // BEFORE: schema_version
-                if pm.path.is_ident("kitchen_menu") {
-                    let lit: syn::LitInt = pm.value()?.parse()?;
-                    out = lit.base10_parse::<u16>().ok();
-                }
-                Ok(())
-            })
-            .ok();
-        }
-    }
-    out
-}
-
-fn compile_error(span: Span, msg: &str) -> TokenStream {
-    let t = quote::quote_spanned!(span => compile_error!(#msg););
-    t.into()
 }
