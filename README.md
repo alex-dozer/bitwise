@@ -122,12 +122,16 @@ fn main() {
 ---
 
 
-Run in release mode:
+Run it:
 
 ```bash
-cargo run --release
+cargo run -p runner
 ```
 
+---
+
+```if-test```
+Just a demonstration on why bitmasking is good.
 *(On typical hardware you’ll see the mask path trounce the naive path; your numbers will vary.)*
 
 ---
