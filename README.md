@@ -122,7 +122,7 @@ fn main() {
 ---
 
 
-Run in release mode:
+Run it:
 
 ```bash
 cargo run -p runner
