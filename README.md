@@ -136,14 +136,6 @@ Just a demonstration on why bitmasking is good.
 
 ---
 
-## Project structure & testing
-
-* **Split front door from engine:** keep the `proc_macro` entry tiny and do the real work in a `proc_macro2` module so you can unit-test it directly.
-* **Unit tests:** feed `syn::parse_quote!` into your `derive_impl`, snapshot the expansion with `prettyplease` + `insta`.
-* **Compile-fail tests:** use `trybuild` to verify diagnostics for bad attributes.
-
----
-
 ## Limitations / gotchas
 
 * `u64` supports up to 64 predicates. Use `u128` or multiple limbs for more.
