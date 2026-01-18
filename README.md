@@ -1,7 +1,3 @@
-This just serves as an example repo for the substack article [here](https://dozerproject.substack.com/p/bitwise)
-
----
-
 # bitwise
 
 **A derive macro that compiles annotated struct fields into bitmask predicates** for branchless, constant-time rule evaluation. It implements a tiny trait (`ToBits`) and generates stable predicate masks so complex boolean logic can be evaluated as simple bitwise checks.
