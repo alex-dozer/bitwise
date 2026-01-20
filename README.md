@@ -1,5 +1,9 @@
 # bitwise
 
+### **NOTE**:
+
+This repo is just a proof of concept and a repo i developed for an article on the substack I deleted. It was used to prove the Bitspec portion [here](https://github.com/The-Dozer-Project/ben-design/blob/main/docs/macros/ben_contracts.md). There are errors in here and I don't have the gumption to fix them (like the hardcoded fixe 500..600 stuff). I figure it is a cool concept to put in a macro and wanted to share.
+
 **A derive macro that compiles annotated struct fields into bitmask predicates** for branchless, constant-time rule evaluation. It implements a tiny trait (`ToBits`) and generates stable predicate masks so complex boolean logic can be evaluated as simple bitwise checks.
 
 > TL;DR - Replace a thicket of `if` chains with:
